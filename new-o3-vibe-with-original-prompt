@@ -1,0 +1,254 @@
+<!--
+  GlitchPassport – MIT Licensed
+  Single‑file drop‑in. Open index.html in any modern browser; it renders a 6529‑style passport
+  from user‑supplied data and offers an instant PNG download.
+  ──────────────────────────────────────────────────────────────────────────
+  If you want separate files:
+    • Move the <script> block into script.js and reference it with <script src="script.js"></script>
+    • Copy the README at the bottom into README.md
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GlitchPassport</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- OCR‑ish mono font via Google Fonts as a stand‑in for OCR‑B -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+
+  <style>
+    :root { --canvas-w: 1095px; --canvas-h: 768px; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Share Tech Mono", "Courier New", monospace;
+      background: #111;
+      color: #eee;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.3rem;
+      padding: 1.3rem 0;
+    }
+    h1 { margin: 0; font-size: 1.9rem; letter-spacing: .5px; }
+
+    form {
+      background: #1b1b1b;
+      padding: 1rem 2rem 2rem;
+      border-radius: .75rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(230px,1fr));
+      gap: 1rem 2rem;
+      width: min(100%, 1100px);
+    }
+    label { display:flex; flex-direction:column; gap:.25rem; font-size:.9rem; }
+    input[type=text],input[type=date]{
+      font-family:inherit;font-size:.9rem;padding:.4rem .5rem;border-radius:.35rem;
+      border:1px solid #444;background:#000;color:#eee;
+    }
+    input[type=file]{color:#bbb;font-size:.85rem}
+    button{
+      grid-column:1/-1;padding:.75rem 1rem;font-size:1rem;font-family:inherit;border:none;
+      border-radius:.5rem;background:#4caf50;color:#fff;cursor:pointer;
+    }
+    button:disabled{background:#333;cursor:not-allowed}
+
+    canvas{outline:2px solid #555;width:var(--canvas-w);height:var(--canvas-h);max-width:100%;height:auto}
+    #downloadBtn{display:none;background:#2196f3}
+  </style>
+</head>
+<body>
+  <h1>GlitchPassport Generator</h1>
+  <form id="passportForm">
+    <label>Sur‑name<input name="surname" required placeholder="OF BEE" /></label>
+    <label>First Name<input name="firstname" required placeholder="BOOK" /></label>
+    <label>Nationality<input name="nationality" required placeholder="GLITCH" /></label>
+    <label>Token Identification<input name="tokenid" required placeholder="THREE SIX NINE" /></label>
+    <label>Reputation<input name="reputation" required placeholder="DANCE OF DEATH" /></label>
+    <label>Authority<input name="authority" required placeholder="THEBOOKOFBEE.ETH" /></label>
+    <label>Mint Date<input name="mintdate" type="date" /></label>
+    <label>ENS Expiry Date<input name="expirydate" type="date" /></label>
+    <label>Passport Number (optional)<input name="passnum" pattern="[0-9A-Fa-f]{6}" title="6 hex chars" placeholder="auto" /></label>
+    <label>Wallet / ENS (for MRZ)<input name="wallet" placeholder="0xABC… or name.eth" /></label>
+    <label>Avatar (square)<input name="avatar" type="file" accept="image/*" /></label>
+    <button type="submit">Generate</button>
+  </form>
+
+  <button id="downloadBtn">Download PNG</button>
+  <canvas id="passportCanvas" width="1095" height="768" hidden></canvas>
+
+<script>
+(() => {
+  'use strict';
+  // Elements
+  const form  = document.getElementById('passportForm');
+  const dlBtn = document.getElementById('downloadBtn');
+  const cvs   = document.getElementById('passportCanvas');
+  const ctx   = cvs.getContext('2d');
+
+  // Date helpers
+  const pad = n=>String(n).padStart(2,'0');
+  const today = new Date();
+  const iso = d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  form.mintdate.value = iso(today);
+  const exp = new Date(today); exp.setFullYear(exp.getFullYear()+2);
+  form.expirydate.value = iso(exp);
+
+  // Event – Generate
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    // Auto‑passport number if blank
+    if(!data.passnum){
+      data.passnum = crypto.getRandomValues(new Uint32Array(1))[0]
+                     .toString(16).toUpperCase().slice(0,6).padStart(6,'0');
+    }
+
+    await renderPassport(data);
+    dlBtn.style.display = 'block';
+  });
+
+  // Event – Download
+  dlBtn.addEventListener('click', () => {
+    const a=document.createElement('a');
+    a.href = cvs.toDataURL('image/png');
+    a.download = `passport_${Date.now()}.png`;
+    a.click();
+  });
+
+  /* ——————————  Drawing Pipeline  —————————— */
+  async function renderPassport(d){
+    cvs.hidden = false;
+    ctx.save();
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+
+    drawGlitchBackground();
+    drawHeader();
+    await drawAvatar(d.avatar);
+    drawTextBlock(d);
+    drawMRZ(d);
+    ctx.restore();
+  }
+
+  /* Glitch background  */
+  function drawGlitchBackground(){
+    // pastel noise blocks
+    const colors = ['#ffb3c1','#b3e5ff','#c1ffc4','#ffecb3','#d5b3ff'];
+    for(let i=0;i<1200;i++){
+      ctx.fillStyle = colors[Math.floor(Math.random()*colors.length)] + Math.floor(Math.random()*80+50).toString(16);
+      const size = Math.random()*35+6;
+      ctx.fillRect(Math.random()*cvs.width, Math.random()*cvs.height, size, size);
+    }
+    // dot‑screen
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    for(let y=0; y<cvs.height; y+=18){
+      for(let x=0; x<cvs.width; x+=18){
+        ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+      }
+    }
+    // subtle diagonal overlay (RGB split vibe)
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.lineWidth = 2;
+    for(let i=-cvs.height; i<cvs.width; i+=25){
+      ctx.beginPath();
+      ctx.moveTo(i,0);
+      ctx.lineTo(i+cvs.height, cvs.height);
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* Header */
+  function drawHeader(){
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 56px "Share Tech Mono"';
+    ctx.textBaseline = 'top';
+    ctx.fillText('6529 NATION', 310, 36);
+  }
+
+  /* Avatar */
+  async function drawAvatar(file){
+    const AVA = 260;
+    if(file && file.size){
+      const url = URL.createObjectURL(file);
+      const img = new Image(); img.src = url;
+      await img.decode();
+      const s = Math.min(img.width,img.height);
+      ctx.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s, 50,110,AVA,AVA);
+      URL.revokeObjectURL(url);
+    } else {
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(50,110,AVA,AVA);
+      ctx.lineWidth = 4; ctx.strokeStyle = '#000'; ctx.strokeRect(50,110,AVA,AVA);
+    }
+  }
+
+  /* Main text block */
+  function drawTextBlock(d){
+    const x=370, lh=54; let y=110;
+    const rows = [
+      ['Type','IDENTIITY'],
+      ['Country','6529'],
+      ['Passport Numba', d.passnum],
+      ['Sur‑name', d.surname.toUpperCase()],
+      ['First Name', d.firstname.toUpperCase()],
+      ['Nationality', d.nationality.toUpperCase()],
+      ['Token Identification', d.tokenid.toUpperCase()],
+      ['Reputation', d.reputation.toUpperCase()],
+      ['Mint Date', fmtDate(d.mintdate)],
+      ['Authority', d.authority.toUpperCase()],
+      ['ENS Expiry Date', fmtDate(d.expirydate)]
+    ];
+    rows.forEach(([label,val])=>{
+      ctx.font='24px "Share Tech Mono"'; ctx.fillStyle='#000'; ctx.fillText(label,x,y);
+      ctx.font='48px "Share Tech Mono"'; ctx.fillText(val,x,y+24);
+      y += lh;
+    });
+    // Globe/biometric symbol
+    drawBiometricSymbol(x+620, 92);
+  }
+
+  function drawBiometricSymbol(x,y){
+    ctx.save();
+    ctx.lineWidth = 6; ctx.strokeStyle = '#000';
+    ctx.beginPath(); ctx.arc(x,y,24,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-42,y); ctx.lineTo(x+42,y); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* MRZ */
+  function drawMRZ(d){
+    ctx.fillStyle = '#000';
+    ctx.font = '36px "Share Tech Mono"';
+    const y = cvs.height-110;
+    const ln1 = (`<${d.surname.toUpperCase()}<<${d.firstname.toUpperCase()}<<${d.reputation.toUpperCase()}<<<<<<<<<<<<<<<<<<`).slice(0,44);
+    const wallet = (d.wallet || ('0x'+crypto.getRandomValues(new Uint32Array(2))[0].toString(16))).toUpperCase();
+    const ln2 = (`<${wallet}`).padEnd(44,'<');
+    ctx.fillText(ln1,30,y);
+    ctx.fillText(ln2,30,y+50);
+  }
+
+  const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const fmtDate = iso => {
+    if(!iso) return '';
+    const [y,m,d] = iso.split('-');
+    return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+  };
+})();
+</script>
+
+<!-- ─────────────── README (for quick copy‑paste into README.md) ───────────────
+# GlitchPassport
+Single‑page generator for a 6529‑style “passport” graphic. Fill the form, hit **Generate**, then **Download PNG**.
+## Run locally
+1. Save **index.html** (and optionally split out the `<script>` into `script.js`).
+2. Open the file in any modern browser. No build‑step, no server needed.
+3. Generate and download as many passports as you like.
+## License
+MIT License © 2025
+-->
+</body>
+</html>
