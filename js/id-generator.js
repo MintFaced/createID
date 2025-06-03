@@ -30,49 +30,214 @@ document.addEventListener('DOMContentLoaded', () => {
   expiryDate.setFullYear(today.getFullYear() + 10);
   const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   
-  // Function to toggle form fields
-  function toggleFormFields(enabled) {
-    const fields = [
-      'firstname',
-      'linenumba',
-      'tokenid',
-      'reputation',
-      'mintdate',
-      'authority',
-      'expirydate',
-      'passnum',
-      'avatar'
+
+  // Set default values in form
+
+  // Helper to reset extra fields
+  function resetExtraFields() {
+    const ids = [
+      'firstname', 'nationality', 'tokenid', 'reputation', 'authority', 'mintdate', 'expirydate', 'passnum', 'wallet', 'avatar'
     ];
-    
-    fields.forEach(id => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.disabled = !enabled;
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (el.type === 'date') {
+          el.value = '';
+        } else if (el.type === 'file') {
+          el.value = null;
+        } else {
+          el.value = '';
+        }
       }
     });
   }
 
-  // Set default values in form and disable fields
-  document.getElementById('mintdate').value = today.toISOString().split('T')[0];
-  document.getElementById('expirydate').value = expiryDate.toISOString().split('T')[0];
-  toggleFormFields(false);
+  // Show/hide and fetch logic for ser-name
+  const sernameInput = document.getElementById('surname');
+  const sernameBtn = document.getElementById('sername-submit');
+  const sendIcon = sernameBtn.querySelector('.send-icon');
+  const spinner = sernameBtn.querySelector('.spinner');
+  let lastSername = '';
 
-  // Enable fields when ser-name is entered and blurred
-  const sernameInput = document.getElementById('sername');
-  sernameInput.addEventListener('blur', () => {
-    if (sernameInput.value.trim()) {
-      toggleFormFields(true);
-    } else {
-      toggleFormFields(false);
+  // Enable button only if ser-name is not empty
+  sernameInput.addEventListener('input', () => {
+    sernameBtn.disabled = !sernameInput.value.trim();
+    if (!sernameInput.value.trim()) {
+      // Hide and reset extra fields if ser-name is cleared
+      const mainFields = document.getElementById('main-fields-row');
+      if (mainFields) {
+        mainFields.style.opacity = 0;
+        setTimeout(() => {
+          mainFields.style.display = 'none';
+          resetExtraFields();
+        }, 1500);
+      }
+      lastSername = '';
     }
   });
-  document.getElementById('surname').value = 'DOE';
-  document.getElementById('firstname').value = 'JOHN';
-  document.getElementById('nationality').value = 'DIGITAL NOMAD';
-  document.getElementById('tokenid').value = '6529-XXXX-XXXX';
-  document.getElementById('reputation').value = 'GM';
-  document.getElementById('authority').value = '6529';
-  
+
+  // Error message element
+  let errorMsg = document.getElementById('sername-error');
+  if (!errorMsg) {
+    errorMsg = document.createElement('div');
+    errorMsg.id = 'sername-error';
+    errorMsg.style.color = '#c00';
+    errorMsg.style.marginTop = '4px';
+    errorMsg.style.display = 'none';
+    sernameInput.parentElement.appendChild(errorMsg);
+  }
+
+  // Allow Enter in Ser-name to trigger submit
+  sernameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      sernameBtn.click();
+    }
+  });
+
+  sernameBtn.addEventListener('click', async () => {
+    const username = sernameInput.value.trim();
+    if (!username || username === lastSername) return;
+    lastSername = username;
+    // Show spinner, disable button
+    sernameBtn.disabled = true;
+    sendIcon.style.display = 'none';
+    spinner.style.display = 'inline-block';
+    errorMsg.style.display = 'none';
+    resetExtraFields();
+    // Hide main fields and reset opacity
+    let mainFields = document.getElementById('main-fields-row');
+    if (mainFields) {
+      mainFields.style.display = 'none';
+      mainFields.style.opacity = 0;
+    }
+
+    // Fetch identity and rep in parallel (using correct endpoints)
+    let identityData = null;
+    let repData = null;
+    let identityError = false;
+    try {
+      const [identityRes, repRes] = await Promise.all([
+        fetch(`https://api.6529.io/api/identities/${encodeURIComponent(username)}`),
+        fetch(`https://api.6529.io/api/profiles/${encodeURIComponent(username)}/rep/ratings/by-rater`)
+      ]);
+      if (identityRes.ok) {
+        identityData = await identityRes.json();
+      } else {
+        identityError = true;
+      }
+      if (repRes.ok) {
+        repData = await repRes.json();
+      }
+    } catch (err) {
+      identityError = true;
+    }
+
+    if (!identityData || identityError) {
+      errorMsg.textContent = 'Identity not found.';
+      errorMsg.style.display = 'block';
+      spinner.style.display = 'none';
+      sendIcon.style.display = 'inline-block';
+      sernameBtn.disabled = false;
+      // Hide all main fields
+      const mainFields = document.getElementById('main-fields-row');
+      if (mainFields) {
+        mainFields.style.display = 'none';
+        mainFields.style.opacity = 0;
+      }
+      return;
+    }
+
+    // Show all main fields after successful lookup
+    if (mainFields) {
+      mainFields.style.display = 'block';
+      mainFields.style.transition = 'opacity 1.5s';
+      setTimeout(() => { mainFields.style.opacity = 1; }, 20);
+    }
+    spinner.style.display = 'none';
+    sendIcon.style.display = 'inline-block';
+    sernameBtn.disabled = false;
+
+    // 1. Type: Already hardcoded to 'Identity' (readonly)
+    const setField = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    };
+    setField('type', 'Identity');
+    // 2. Ser-name: user input, no change
+    // 3. First Name: leave blank (user-editable)
+    // 4. Line number: extract from repData (look for category/description)
+    let lineNum = '';
+    if (repData && Array.isArray(repData.data)) {
+      const match = repData.data.find(r => r.category && /Line (\d+) Artist/.test(r.category));
+      if (match) {
+        const digits = match.category.match(/Line (\d+) Artist/);
+        if (digits && digits[1]) lineNum = digits[1];
+      }
+    }
+    setField('linenumba', lineNum);
+    // 5. Token Identification: use pfp token_id if present (or blank)
+    setField('tokenid', identityData.pfp_token_id || '');
+    // 6. Reputation: show text/description of highest rep given
+    let highestRepText = '';
+    if (repData && Array.isArray(repData.data) && repData.data.length > 0) {
+      const highest = repData.data.reduce((a, b) => (a.rating > b.rating ? a : b));
+      highestRepText = highest.description || highest.category || highest.rating;
+    }
+    setField('reputation', highestRepText);
+    // 7. Mint Date: account creation date
+    setField('mintdate', identityData.created_at ? identityData.created_at.split('T')[0] : '');
+    // 8. Expiry Date: ENS expiry (if available, else blank)
+    setField('expirydate', identityData.ens_expiry ? identityData.ens_expiry.split('T')[0] : '');
+    // 9. Authority: ENS name of primary_wallet (if present)
+    let authority = identityData.primary_wallet_ens || '';
+    setField('authority', authority);
+    // 10. Country: hardcode to '6529' if found, else blank (editable)
+    setField('nationality', identityData ? '6529' : '');
+    // 11. Passport Numba: last 7 chars of primary_wallet
+    let passportNum = '';
+    if (identityData.primary_wallet) passportNum = identityData.primary_wallet.slice(-7).toUpperCase();
+    setField('passnum', passportNum);
+    // Wallet ENS field: fill with ENS if available, else address
+    if (identityData.primary_wallet_ens) {
+      setField('wallet', identityData.primary_wallet_ens);
+    } else if (identityData.primary_wallet) {
+      setField('wallet', identityData.primary_wallet);
+    }
+
+    // Populate avatar preview if pfp image is available and store for later use
+    if (identityData.pfp) {
+      // If #avatar-preview exists, set its src
+      const avatarImg = document.getElementById('avatar-preview');
+      let pfpUrl = identityData.pfp;
+      if (pfpUrl.startsWith('ipfs://')) {
+        pfpUrl = 'https://dweb.link/ipfs/' + pfpUrl.replace('ipfs://', '');
+      }
+      window._6529_lastPfpUrl = pfpUrl;
+      if (avatarImg) {
+        avatarImg.src = pfpUrl;
+        avatarImg.onload = () => console.log('[6529] Avatar image loaded:', pfpUrl);
+        avatarImg.onerror = (e) => console.warn('[6529] Avatar image failed to load:', pfpUrl, e);
+      } else {
+        console.warn('[6529] #avatar-preview element not found in DOM');
+      }
+    } else {
+      window._6529_lastPfpUrl = null;
+      console.log('[6529] No pfp found in identityData');
+    }
+
+    // Hide spinner, enable button
+    spinner.style.display = 'none';
+    sendIcon.style.display = 'inline-block';
+    sernameBtn.disabled = false;
+    // Fade in extra fields
+    extraFields.style.display = 'block';
+    setTimeout(() => {
+      extraFields.classList.add('fade-in');
+      extraFields.style.opacity = 1;
+    }, 10);
+  });
+
   // Handle file input changes
   avatarInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -97,45 +262,45 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Form submission
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
+  function renderPassportWithAvatar(img) {
     const formData = new FormData(form);
     const today = new Date();
     const expiryDate = new Date();
     expiryDate.setFullYear(today.getFullYear() + 10);
-    
     const data = {
       firstname: formData.get('firstname') || 'JOHN',
       surname: formData.get('surname') || 'DOE',
       nationality: formData.get('nationality') || 'DIGITAL NOMAD',
       tokenid: formData.get('tokenid') || '6529-XXXX-XXXX',
-      reputation: formData.get('reputation') || 'GM',
-      authority: formData.get('authority') || '6529',
-      mintdate: formData.get('mintdate') || today.toISOString().split('T')[0],
-      expirydate: formData.get('expirydate') || expiryDate.toISOString().split('T')[0],
-      passnum: formData.get('passnum') || '6529' + Math.floor(100000 + Math.random() * 900000).toString(),
-      avatar: formData.get('avatar')
+      reputation: formData.get('reputation') || '',
+      authority: formData.get('authority') || '',
+      mintdate: formData.get('mintdate') || iso(today),
+      expirydate: formData.get('expirydate') || iso(expiryDate),
+      passnum: formData.get('passnum') || '',
+      wallet: formData.get('wallet') || '',
+      avatarImg: img // pass loaded avatar image
     };
-    
-    try {
-      await renderPassport(data);
-      
-      // Auto-scroll to the canvas
-      document.getElementById('passport-canvas').scrollIntoView({ behavior: 'smooth' });
-      
-      // Add generated class for visual feedback
-      canvas.classList.add('generated');
-      
-      // No auto-download
-      
-    } catch (error) {
-      console.error('Error generating passport:', error);
-      alert('An error occurred while generating the passport. Please try again.');
-    } finally {
-      // Reset loading state
-      submitBtn.disabled = false;
-      submitBtn.classList.remove('loading');
+    // Call your actual passport rendering logic here, e.g.:
+    renderPassport(data);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    // Get avatar: prefer local upload, else use 6529 API pfp
+    let avatarImg = null;
+    if (avatarInput && avatarInput.files && avatarInput.files[0]) {
+      avatarImg = new Image();
+      avatarImg.src = URL.createObjectURL(avatarInput.files[0]);
+    } else if (window._6529_lastPfpUrl) {
+      avatarImg = new Image();
+      avatarImg.src = window._6529_lastPfpUrl;
+    }
+    // Wait for avatar to load if present, then proceed to render passport
+    if (avatarImg) {
+      avatarImg.onload = () => renderPassportWithAvatar(avatarImg);
+      avatarImg.onerror = () => renderPassportWithAvatar(null);
+    } else {
+      renderPassportWithAvatar(null);
     }
   });
   

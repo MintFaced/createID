@@ -52,68 +52,34 @@
       <h1>6529 ID Please Generator</h1>
       
       <form id="passport-form">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="surname">Ser‑name</label>
-            <input id="surname" required name="surname" type="text" placeholder="DEGEN" />
-          </div>
-          
-          <div class="form-group">
-            <label for="firstname">First Name</label>
-            <input id="firstname" required name="firstname" type="text" placeholder="KEVIN" />
-          </div>
-          
-          <div class="form-group">
-            <label for="nationality">Nationality</label>
-            <input id="nationality" required name="nationality" type="text" placeholder="COUNTRY" />
-          </div>
-          
-          <div class="form-group">
-            <label for="tokenid">Token Identification</label>
-            <input id="tokenid" required name="tokenid" type="text" placeholder="NUMBER" />
-          </div>
-          
-          <div class="form-group">
-            <label for="reputation">Reputation</label>
-            <input id="reputation" required name="reputation" type="text" placeholder="FLEX" />
-          </div>
-          
-          <div class="form-group">
-            <label for="authority">Authority</label>
-            <input id="authority" required name="authority" type="text" placeholder=".ETH ADDRESS" />
-          </div>
-          
-          <div class="form-group">
-            <label for="mintdate">Mint Date</label>
-            <input id="mintdate" name="mintdate" type="date" />
-          </div>
-          
-          <div class="form-group">
-            <label for="expirydate">ENS Expiry Date</label>
-            <input id="expirydate" name="expirydate" type="date" />
-          </div>
-          
-          <div class="form-group">
-            <label for="passnum">Passport Number (hex, 7 chars)</label>
-            <input id="passnum" name="passnum" type="text" placeholder="7F3A180" pattern="[0-9A-Fa-f]{7}" title="7 hexadecimal characters" />
-          </div>
-          
-          <div class="form-group">
-            <label for="wallet">Wallet / ENS (for MRZ)</label>
-            <input id="wallet" name="wallet" type="text" placeholder="0xABC... or name.eth" />
-          </div>
-          
-          <div class="form-group">
-            <label for="avatar">PFP (square image)</label>
-            <input id="avatar" name="avatar" type="file" accept="image/*" />
-          </div>
-          
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-              <span class="btn-text">Generate & Download</span>
-              <span class="btn-loader">Generating...</span>
+        <div style="display: flex; justify-content: center; margin-bottom: 24px;">
+          <div class="form-group sername-group" style="display: flex; gap: 10px; align-items: flex-end;">
+            <label for="surname" style="margin-bottom: 0;">Ser‑name</label>
+            <input id="surname" required name="surname" type="text" placeholder="6529 Identity" style="min-width: 220px;" />
+            <button id="sername-submit" type="button" class="sername-submit-btn" disabled>
+              <span class="send-icon">&#x27A4;</span>
+              <span class="spinner" style="display:none;"></span>
             </button>
           </div>
+        </div>
+        <div id="main-fields-row" style="display: none; width: 100%; max-width: 700px; margin: 0 auto 0 auto;">
+          <div class="main-fields-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%;">
+            <div class="form-group"><label for="firstname">First Name</label><input id="firstname" name="firstname" type="text" placeholder="KEVIN" /></div>
+            <div class="form-group"><label for="authority">Authority</label><input id="authority" name="authority" type="text" placeholder=".ETH ADDRESS" /></div>
+            <div class="form-group"><label for="reputation">Reputation</label><input id="reputation" name="reputation" type="text" placeholder="FLEX" /></div>
+            <div class="form-group"><label for="wallet">Wallet ENS</label><input id="wallet" name="wallet" type="text" placeholder=".ETH or 0x..." /></div>
+            <div class="form-group"><label for="passnum">Passport Numba</label><input id="passnum" name="passnum" type="text" placeholder="NUMBER" /></div>
+            <div class="form-group"><label for="nationality">Nationality</label><input id="nationality" name="nationality" type="text" placeholder="COUNTRY" /></div>
+            <div class="form-group"><label for="tokenid">Token Identification</label><input id="tokenid" name="tokenid" type="text" placeholder="NUMBER" /></div>
+            <div class="form-group"><label for="mintdate">Mint Date</label><input id="mintdate" name="mintdate" type="date" /></div>
+            <div class="form-group"><label for="expirydate">ENS Expiry Date</label><input id="expirydate" name="expirydate" type="date" /></div>
+            <div class="form-group"><label for="wallet">Wallet / ENS (for MRZ)</label><input id="wallet" name="wallet" type="text" placeholder="0xABC... or name.eth" /></div>
+            <div class="form-group"><label for="avatar">PFP (square image)</label><input id="avatar" name="avatar" type="file" accept="image/*" /></div>
+            <div style="margin-top: 8px;"><img id="avatar-preview" style="max-width: 80px; max-height: 80px; border-radius: 6px; border: 1px solid #ccc; background: #222;" /></div>
+          </div>
+        </div>
+        <div style="width:100%;display:flex;justify-content:center;margin-top:24px;">
+          <button id="generate-btn" type="submit" class="generate-btn">Generate</button>
         </div>
       </form>
       
