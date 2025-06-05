@@ -72,14 +72,24 @@ document.addEventListener('DOMContentLoaded', () => {
   sernameInput.addEventListener('input', () => {
     // sernameBtn is already defined
     sernameBtn.disabled = !sernameInput.value.trim();
+    
+    // Hide preview, download button, and main fields when input changes
+    const previewContainer = document.querySelector('.preview-container');
+    const downloadSection = document.getElementById('download-section');
+    const mainFields = document.getElementById('main-fields-row');
+    
+    if (previewContainer) previewContainer.style.display = 'none';
+    if (downloadSection) downloadSection.style.display = 'none';
+    
+    // Hide main fields whenever there's typing (not just when cleared)
+    if (mainFields) {
+      mainFields.style.display = 'none';
+      mainFields.style.opacity = 0;
+    }
+    
     if (!sernameInput.value.trim()) {
-      // Hide and reset extra fields if ser-name is cleared
-      const mainFields = document.getElementById('main-fields-row');
-      if (mainFields) {
-        mainFields.style.display = 'none'; // Hide immediately
-        mainFields.style.opacity = 0; // Reset opacity as well
-        resetExtraFields();
-      }
+      // Reset extra fields if ser-name is cleared
+      resetExtraFields();
       canvas.style.display = 'none'; // Hide canvas
       _currentIdentityData = null; // Clear current identity data
       lastSername = '';
@@ -564,7 +574,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPassport(data);
   }
 
-  const inputIdsToTrack = ['firstname', 'surname', 'nationality', 'tokenid', 'reputation', 'linenumba', 'authority', 'mintdate', 'expirydate'];
+  // Exclude 'surname' from auto-update since it has special handling in the main input handler
+  const inputIdsToTrack = ['firstname', 'nationality', 'tokenid', 'reputation', 'linenumba', 'authority', 'mintdate', 'expirydate'];
   inputIdsToTrack.forEach(id => {
     const element = document.getElementById(id);
     if (element) {
@@ -761,9 +772,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const charWidth = ctx.measureText('<').width;
     const maxChars = Math.floor(mrzWidth / charWidth);
     
-    const ln1 = `<${(d.firstname || '').toUpperCase()}<${(d.surname || '').toUpperCase()}<${(d.reputation || '').toUpperCase()}`.padEnd(maxChars, '<');
+    // Replace spaces with < in all fields
+    const firstname = (d.firstname || '').toUpperCase().replace(/ /g, '<');
+    const surname = (d.surname || '').toUpperCase().replace(/ /g, '<');
+    const reputation = (d.reputation || '').toUpperCase().replace(/ /g, '<');
+    
+    const ln1 = `<${firstname}<${surname}<${reputation}`.padEnd(maxChars, '<');
     // MRZ line 2: <WALLET (or tokenid) padded
-    let wallet = (d.primary_wallet || d.tokenid || '').toUpperCase();
+    let wallet = (d.primary_wallet || d.tokenid || '').toUpperCase().replace(/ /g, '<');
     const ln2 = `<${wallet}`.padEnd(maxChars, '<');
     ctx.fillText(ln1, 40, mrzY);
     ctx.fillText(ln2, 40, mrzY + 35);
