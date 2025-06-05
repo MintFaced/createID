@@ -54,9 +54,9 @@
       <form id="passport-form">
         <div style="display: flex; justify-content: center; margin-bottom: 24px;">
           <div class="form-group sername-group" style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
-            <label for="surname" style="margin-bottom: 0; font-weight: 600;">6529 Identity</label>
+            <label for="identity" style="margin-bottom: 0; font-weight: 600;">6529 Identity</label>
             <div style="display: flex; gap: 10px; align-items: center;">
-              <input id="surname" required name="surname" type="text" placeholder="6529 Identity" style="min-width: 220px;" />
+              <input id="identity" required name="identity" type="text" placeholder="6529 Identity" style="min-width: 220px;" />
               <button id="sername-submit" type="button" class="sername-submit-btn" disabled>
                 <span class="send-icon">&#x27A4;</span>
                 <span class="spinner" style="display:none;"></span>
@@ -67,22 +67,22 @@
         <div id="main-fields-row" style="display: none; width: 100%; max-width: 700px; margin: 0 auto 0 auto;">
           <div class="main-fields-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%;">
             <div class="form-group"><label for="firstname">First Name</label><input id="firstname" name="firstname" type="text" placeholder="KEVIN" /></div>
+            <div class="form-group"><label for="surname">Ser-name</label><input id="surname" name="surname" type="text" placeholder="SER-NAME" /></div>
+            <div class="form-group"><label for="passnum">Passport Numba</label><input id="passnum" name="passnum" type="text" placeholder="NUMBER" readonly /></div>
             <div class="form-group"><label for="linenumba">Line Numba</label><input id="linenumba" name="linenumba" type="text" placeholder="LINE NUMBER" /></div>
             <div class="form-group"><label for="authority">Authority</label><input id="authority" name="authority" type="text" placeholder=".ETH ADDRESS" readonly /></div>
-            <div class="form-group"><label for="reputation">Reputation</label><input id="reputation" name="reputation" type="text" placeholder="FLEX" /></div>
-            <div class="form-group"><label for="passnum">Passport Numba</label><input id="passnum" name="passnum" type="text" placeholder="NUMBER" readonly /></div>
-            <div class="form-group"><label for="nationality">Nationality</label><input id="nationality" name="nationality" type="text" placeholder="COUNTRY" /></div>
-            <div class="form-group"><label for="tokenid">Token Identification</label><input id="tokenid" name="tokenid" type="text" placeholder="NUMBER" /></div>
-            <div class="form-group"><label for="mintdate">Mint Date</label><input id="mintdate" name="mintdate" type="date" readonly /></div>
             <div class="form-group"><label for="expirydate">ENS Expiry Date</label><input id="expirydate" name="expirydate" type="date" readonly /></div>
+            <div class="form-group"><label for="mintdate">Mint Date</label><input id="mintdate" name="mintdate" type="date" readonly /></div>
+            <div class="form-group"><label for="reputation">Reputation</label><input id="reputation" name="reputation" type="text" placeholder="FLEX" /></div>
             
             <div class="form-group">
               <label for="avatar">PFP (square image)</label>
               <div style="display: flex; align-items: center; gap: 10px;">
-                <img id="avatar-preview" style="width: 40px; height: 40px; border-radius: 6px; border: 1px solid #ccc; background: #222; object-fit: cover;" />
+                <img id="avatar-preview" alt="Avatar preview" style="width: 40px; height: 40px; border-radius: 4px; display: none; object-fit: cover;">
                 <input id="avatar" name="avatar" type="file" accept="image/*" />
               </div>
             </div>
+            <div class="form-group"><label for="tokenid">Token Identification</label><input id="tokenid" name="tokenid" type="text" placeholder="NUMBER" /></div>
           </div>
         </div>
         <!--<div style="width:100%;display:flex;justify-content:center;margin-top:24px;">

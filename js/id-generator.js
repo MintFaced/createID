@@ -62,16 +62,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Show/hide and fetch logic for ser-name
-  const sernameInput = document.getElementById('surname');
+  // Show/hide and fetch logic for identity
+  const identityInput = document.getElementById('identity');
   const sendIcon = sernameBtn.querySelector('.send-icon'); // Use defined sernameBtn
   const spinner = sernameBtn.querySelector('.spinner'); // Use defined sernameBtn
-  let lastSername = '';
+  let lastIdentity = '';
 
-  // Enable button only if ser-name is not empty
-  sernameInput.addEventListener('input', () => {
+  // Enable button only if identity is not empty
+  identityInput.addEventListener('input', () => {
     // sernameBtn is already defined
-    sernameBtn.disabled = !sernameInput.value.trim();
+    sernameBtn.disabled = !identityInput.value.trim();
     
     // Hide preview, download button, and main fields when input changes
     const previewContainer = document.querySelector('.preview-container');
@@ -87,12 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
       mainFields.style.opacity = 0;
     }
     
-    if (!sernameInput.value.trim()) {
-      // Reset extra fields if ser-name is cleared
+    if (!identityInput.value.trim()) {
+      // Reset extra fields if identity is cleared
       resetExtraFields();
       canvas.style.display = 'none'; // Hide canvas
       _currentIdentityData = null; // Clear current identity data
-      lastSername = '';
+      lastIdentity = '';
     }
   });
 
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     errorMsg.style.color = '#c00';
     errorMsg.style.marginTop = '4px';
     errorMsg.style.display = 'none';
-    sernameInput.parentElement.appendChild(errorMsg);
+    identityInput.parentElement.appendChild(errorMsg);
   }
 
   // Function to fetch ENS name and expiry using Viem
@@ -202,8 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Allow Enter in Ser-name to trigger submit
-  sernameInput.addEventListener('keydown', (e) => {
+  // Allow Enter in Identity to trigger submit
+  identityInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       sernameBtn.click(); // Use defined sernameBtn
@@ -225,9 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let identityError = false;
     let inboundRepLog = null; // Declare inboundRepLog in the correct scope
     _currentIdentityData = null; // Reset identity data before new fetch
-    const username = sernameInput.value.trim();
-    if (!username || username === lastSername) return;
-    lastSername = username;
+    const username = identityInput.value.trim();
+    if (!username || username === lastIdentity) return;
+    lastIdentity = username;
     // Show spinner, disable button
     // sernameBtn is already defined
     sernameBtn.disabled = true;
@@ -374,7 +374,8 @@ document.addEventListener('DOMContentLoaded', () => {
       sendIcon.style.display = 'inline-block';
       sernameBtn.disabled = false;
       setField('type', 'Identity');
-      // 2. Ser-name: user input, no change
+      // 2. Ser-name: populate with the identity value
+      setField('surname', username);
       // 3. First Name: leave blank (user-editable)
       // 4. Line number: not available from rep anymore, leave blank
       setField('linenumba', '');
@@ -560,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const data = {
       firstname: formData.get('firstname') || '-',
       surname: formData.get('surname') || '-',
-      nationality: formData.get('nationality') || '-',
+      nationality: '6529', // Always hardcoded to 6529
       tokenid: formData.get('tokenid') || '-',
       reputation: formData.get('reputation') || '-',
       linenumba: formData.get('linenumba') || '-',
@@ -574,8 +575,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPassport(data);
   }
 
-  // Exclude 'surname' from auto-update since it has special handling in the main input handler
-  const inputIdsToTrack = ['firstname', 'nationality', 'tokenid', 'reputation', 'linenumba', 'authority', 'mintdate', 'expirydate'];
+  // Include 'surname' since it's now a regular editable field, exclude 'nationality' since it's hardcoded
+  const inputIdsToTrack = ['firstname', 'surname', 'tokenid', 'reputation', 'linenumba', 'authority', 'mintdate', 'expirydate'];
   inputIdsToTrack.forEach(id => {
     const element = document.getElementById(id);
     if (element) {
@@ -601,8 +602,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (downloadBtn) {
     downloadBtn.addEventListener('click', () => {
       const link = document.createElement('a');
-      const sername = document.getElementById('surname').value.trim() || 'passport';
-      link.download = `6529-passport-${sername}.png`;
+      const identity = document.getElementById('identity').value.trim() || 'passport';
+      link.download = `6529-passport-${identity}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     });
