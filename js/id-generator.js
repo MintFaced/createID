@@ -419,29 +419,29 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setField('reputation', highestRepText);
       
-      // 7. Mint Date: Try to fetch from profiles API endpoint
+      // 7. Mint Date: Fetch from profile-logs API endpoint for PROFILE_CREATED event
       try {
-        const profileResponse = await fetch(`https://api.6529.io/api/profiles/${username}`);
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          if (profileData.profile && profileData.profile.created_at) {
-            const createdDate = new Date(profileData.profile.created_at);
+        const profileLogsResponse = await fetch(`https://api.6529.io/api/profile-logs?profile=${username}&log_type=PROFILE_CREATED`);
+        if (profileLogsResponse.ok) {
+          const logsData = await profileLogsResponse.json();
+          if (logsData.data && logsData.data.length > 0 && logsData.data[0].created_at) {
+            const createdDate = new Date(logsData.data[0].created_at);
             setField('mintdate', createdDate.toISOString().split('T')[0]);
-            console.log(`[6529] Profile created at: ${profileData.profile.created_at}`);
+            console.log(`[6529] Profile created at: ${logsData.data[0].created_at}`);
           } else {
             setField('mintdate', '');
-            console.log('[6529] No created_at in profile data');
+            console.log('[6529] No PROFILE_CREATED log found');
           }
         } else {
           setField('mintdate', '');
-          console.log(`[6529] Failed to fetch profile data: ${profileResponse.status}`);
+          console.log(`[6529] Failed to fetch profile logs: ${profileLogsResponse.status}`);
         }
       } catch (error) {
-        console.error('[6529] Error fetching profile data:', error);
+        console.error('[6529] Error fetching profile logs:', error);
         setField('mintdate', '');
       }
       
-      // 8. Expiry Date: Fetch via Viem if primary_wallet exists
+      // 8. ENS Name and Expiry Date
       if (identityData && identityData.primary_wallet) {
         await fetchEnsNameAndExpiry(identityData.primary_wallet);
       } else {
@@ -788,23 +788,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function formatDate(isoStr) {
     if (!isoStr || isoStr === '-') return ''; // If empty or just a hyphen, display nothing
+    
+    // Simply return the YYYY-MM-DD format as-is
+    // Basic validation to ensure it's in the correct format
     const parts = isoStr.split('-');
-    if (parts.length !== 3) return ''; // Not a valid YYYY-MM-DD format for us
-
+    if (parts.length !== 3) return ''; // Not a valid YYYY-MM-DD format
+    
     const [y, m, d] = parts;
     const yearNum = parseInt(y);
     const monthNum = parseInt(m);
     const dayNum = parseInt(d);
-
+    
     // Basic validation for date components
     if (isNaN(yearNum) || String(yearNum).length !== 4 || 
         isNaN(monthNum) || monthNum < 1 || monthNum > 12 || 
         isNaN(dayNum) || dayNum < 1 || dayNum > 31) {
       return ''; // Invalid date components
     }
-
-    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    return `${dayNum} ${months[monthNum - 1]} ${yearNum}`;
+    
+    // Return the date in YYYY-MM-DD format
+    return isoStr;
   }
 
   function drawPassportSymbol(x, y) {
