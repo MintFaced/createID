@@ -53,37 +53,44 @@
       
       <form id="passport-form">
         <div style="display: flex; justify-content: center; margin-bottom: 24px;">
-          <div class="form-group sername-group" style="display: flex; gap: 10px; align-items: flex-end;">
-            <label for="surname" style="margin-bottom: 0;">Ser‑name</label>
-            <input id="surname" required name="surname" type="text" placeholder="6529 Identity" style="min-width: 220px;" />
-            <button id="sername-submit" type="button" class="sername-submit-btn" disabled>
-              <span class="send-icon">&#x27A4;</span>
-              <span class="spinner" style="display:none;"></span>
-            </button>
+          <div class="form-group sername-group" style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <label for="surname" style="margin-bottom: 0; font-weight: 600;">Ser‑name</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input id="surname" required name="surname" type="text" placeholder="6529 Identity" style="min-width: 220px;" />
+              <button id="sername-submit" type="button" class="sername-submit-btn" disabled>
+                <span class="send-icon">&#x27A4;</span>
+                <span class="spinner" style="display:none;"></span>
+              </button>
+            </div>
           </div>
         </div>
         <div id="main-fields-row" style="display: none; width: 100%; max-width: 700px; margin: 0 auto 0 auto;">
           <div class="main-fields-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%;">
             <div class="form-group"><label for="firstname">First Name</label><input id="firstname" name="firstname" type="text" placeholder="KEVIN" /></div>
-            <div class="form-group"><label for="authority">Authority</label><input id="authority" name="authority" type="text" placeholder=".ETH ADDRESS" /></div>
+            <div class="form-group"><label for="linenumba">Line Numba</label><input id="linenumba" name="linenumba" type="text" placeholder="LINE NUMBER" /></div>
+            <div class="form-group"><label for="authority">Authority</label><input id="authority" name="authority" type="text" placeholder=".ETH ADDRESS" readonly /></div>
             <div class="form-group"><label for="reputation">Reputation</label><input id="reputation" name="reputation" type="text" placeholder="FLEX" /></div>
-            <div class="form-group"><label for="wallet">Wallet ENS</label><input id="wallet" name="wallet" type="text" placeholder=".ETH or 0x..." /></div>
-            <div class="form-group"><label for="passnum">Passport Numba</label><input id="passnum" name="passnum" type="text" placeholder="NUMBER" /></div>
+            <div class="form-group"><label for="passnum">Passport Numba</label><input id="passnum" name="passnum" type="text" placeholder="NUMBER" readonly /></div>
             <div class="form-group"><label for="nationality">Nationality</label><input id="nationality" name="nationality" type="text" placeholder="COUNTRY" /></div>
             <div class="form-group"><label for="tokenid">Token Identification</label><input id="tokenid" name="tokenid" type="text" placeholder="NUMBER" /></div>
-            <div class="form-group"><label for="mintdate">Mint Date</label><input id="mintdate" name="mintdate" type="date" /></div>
-            <div class="form-group"><label for="expirydate">ENS Expiry Date</label><input id="expirydate" name="expirydate" type="date" /></div>
-            <div class="form-group"><label for="wallet">Wallet / ENS (for MRZ)</label><input id="wallet" name="wallet" type="text" placeholder="0xABC... or name.eth" /></div>
-            <div class="form-group"><label for="avatar">PFP (square image)</label><input id="avatar" name="avatar" type="file" accept="image/*" /></div>
-            <div style="margin-top: 8px;"><img id="avatar-preview" style="max-width: 80px; max-height: 80px; border-radius: 6px; border: 1px solid #ccc; background: #222;" /></div>
+            <div class="form-group"><label for="mintdate">Mint Date</label><input id="mintdate" name="mintdate" type="date" readonly /></div>
+            <div class="form-group"><label for="expirydate">ENS Expiry Date</label><input id="expirydate" name="expirydate" type="date" readonly /></div>
+            
+            <div class="form-group">
+              <label for="avatar">PFP (square image)</label>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <img id="avatar-preview" style="width: 40px; height: 40px; border-radius: 6px; border: 1px solid #ccc; background: #222; object-fit: cover;" />
+                <input id="avatar" name="avatar" type="file" accept="image/*" />
+              </div>
+            </div>
           </div>
         </div>
-        <div style="width:100%;display:flex;justify-content:center;margin-top:24px;">
+        <!--<div style="width:100%;display:flex;justify-content:center;margin-top:24px;">
           <button id="generate-btn" type="submit" class="generate-btn">Generate</button>
-        </div>
+        </div>-->
       </form>
       
-      <div class="preview-container">
+      <div class="preview-container" style="display: none;">
         <canvas id="passport-canvas" width="1095" height="768"></canvas>
       </div>
     </div>
@@ -91,12 +98,12 @@
   
   <footer class="site-footer">
     <div class="container">
-      <p>© 2025 6529. All rights reserved.</p>
+      <p> 2025 6529. All rights reserved.</p>
     </div>
   </footer>
   
   <!-- Main JavaScript -->
   <script src="js/main.js"></script>
-  <script src="js/id-generator.js" type="module"></script>
+  <script type="module" src="js/id-generator.js"></script>
 </body>
 </html>
