@@ -585,14 +585,30 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePassportCanvas();
   });
 
+  // Download button functionality
+  const downloadBtn = document.getElementById('download-btn');
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => {
+      const link = document.createElement('a');
+      const sername = document.getElementById('surname').value.trim() || 'passport';
+      link.download = `6529-passport-${sername}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  }
+
   // Event listeners for real-time form updates are set up after renderPassportWithAvatar
 
   // Main rendering function
   async function renderPassport(d) {
-    // Show the preview container when rendering
+    // Show the preview container and download button when rendering
     const previewContainer = document.querySelector('.preview-container');
+    const downloadSection = document.getElementById('download-section');
     if (previewContainer) {
       previewContainer.style.display = 'block';
+    }
+    if (downloadSection) {
+      downloadSection.style.display = 'block';
     }
     
     ctx.save();
