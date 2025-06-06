@@ -76,10 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hide preview, download button, and main fields when input changes
     const previewContainer = document.querySelector('.preview-container');
     const downloadSection = document.getElementById('download-section');
+    const actionButtons = document.getElementById('action-buttons');
     const mainFields = document.getElementById('main-fields-row');
     
     if (previewContainer) previewContainer.style.display = 'none';
     if (downloadSection) downloadSection.style.display = 'none';
+    if (actionButtons) actionButtons.style.display = 'none';
     
     // Hide main fields whenever there's typing (not just when cleared)
     if (mainFields) {
@@ -91,6 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Reset extra fields if identity is cleared
       resetExtraFields();
       canvas.style.display = 'none'; // Hide canvas
+      if (downloadSection) {
+        downloadSection.style.display = 'none';
+      }
+      if (actionButtons) {
+        actionButtons.style.display = 'none';
+      }
       _currentIdentityData = null; // Clear current identity data
       lastIdentity = '';
     }
@@ -616,11 +624,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show the preview container and download button when rendering
     const previewContainer = document.querySelector('.preview-container');
     const downloadSection = document.getElementById('download-section');
+    const actionButtons = document.getElementById('action-buttons');
     if (previewContainer) {
       previewContainer.style.display = 'block';
     }
     if (downloadSection) {
       downloadSection.style.display = 'block';
+    }
+    if (actionButtons) {
+      actionButtons.style.display = 'block';
     }
     
     ctx.save();
