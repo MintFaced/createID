@@ -576,6 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
       authority: formData.get('authority') || '-',
       mintdate: formData.get('mintdate') || '-',
       expirydate: formData.get('expirydate') || '-',
+      passnum: formData.get('passnum') || '-',
       primary_wallet: (_currentIdentityData && _currentIdentityData.primary_wallet) ? _currentIdentityData.primary_wallet : '-', // For MRZ only
       avatarImg: img // pass loaded avatar image
     };
@@ -686,7 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.font = '32px "OCR B"';
     ctx.fillText('IDENTITY', col1, 120);
     ctx.fillText('6529', col2, 120);
-    ctx.fillText(d.passnum || 'AF07862', col3, 120);
+    ctx.fillText(d.passnum || '-', col3, 120);
 
     // ePassport logo (top right)
     if (epassportImg.complete) {
