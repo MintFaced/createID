@@ -802,8 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function formatDate(isoStr) {
     if (!isoStr || isoStr === '-') return ''; // If empty or just a hyphen, display nothing
     
-    // Simply return the YYYY-MM-DD format as-is
-    // Basic validation to ensure it's in the correct format
+    // Parse the YYYY-MM-DD format
     const parts = isoStr.split('-');
     if (parts.length !== 3) return ''; // Not a valid YYYY-MM-DD format
     
@@ -819,8 +818,15 @@ document.addEventListener('DOMContentLoaded', () => {
       return ''; // Invalid date components
     }
     
-    // Return the date in YYYY-MM-DD format
-    return isoStr;
+    // Month names array
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    // Format the date as DD Mon YYYY
+    const formattedDay = String(dayNum).padStart(2, '0');
+    const monthName = monthNames[monthNum - 1];
+    
+    return `${formattedDay} ${monthName} ${yearNum}`;
   }
 
   function drawPassportSymbol(x, y) {
