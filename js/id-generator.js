@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setField('reputation', highestRepText);
       
-      // 7. Mint Date: Fetch from profile-logs API endpoint for PROFILE_CREATED event
+      // 7. Citizen Since: Fetch from profile-logs API endpoint for PROFILE_CREATED event
       try {
         const profileLogsResponse = await fetch(`https://api.6529.io/api/profile-logs?profile=${username}&log_type=PROFILE_CREATED`);
         if (profileLogsResponse.ok) {
@@ -744,9 +744,9 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillText((d.reputation || '').toUpperCase(), x, y + 30);
     y += lineGap + blockGap;
 
-    // Mint Date
+    // Citizen Since
     ctx.font = labelFont;
-    ctx.fillText('Mint Date', x, y);
+    ctx.fillText('Citizen Since', x, y);
     ctx.font = valueFont;
     const formattedMintDate = formatDate(d.mintdate);
     ctx.fillText(formattedMintDate || '-', x, y + 30);
