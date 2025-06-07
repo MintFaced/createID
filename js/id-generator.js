@@ -819,8 +819,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Month names array
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
+                       'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
     
     // Format the date as DD Mon YYYY
     const formattedDay = String(dayNum).padStart(2, '0');
